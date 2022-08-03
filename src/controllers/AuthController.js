@@ -15,30 +15,35 @@ class AuthController {
             }
         })
 
-        if (resultado.status !== 1) {
-            const verifyPass = bcrypt.compareSync(senha, resultado.senha);
-            if (verifyPass) {
-                const jwt = jsonwebtoken
-                const id = resultado.id
-                const token = jwt.sign({ id }, process.env.SECRET, {
-                    expiresIn: '1d'
-                });
-
-
-                await Usuarios.update({ token: token }, {
-                    where: {
-                        id: resultado.id
-                    }
-                })
-
-                res.json({ auth: true, user: resultado, tokenLogin: token })
+        if(resultado){
+            if (resultado.status !== 1) {
+                const verifyPass = bcrypt.compareSync(senha, resultado.senha);
+                if (verifyPass) {
+                    const jwt = jsonwebtoken
+                    const id = resultado.id
+                    const token = jwt.sign({ id }, process.env.SECRET, {
+                        expiresIn: '1d'
+                    });
+    
+    
+                    await Usuarios.update({ token: token }, {
+                        where: {
+                            id: resultado.id
+                        }
+                    })
+    
+                   return res.json({ auth: true, user: resultado, tokenLogin: token })
+                } else {
+                    return res.json({ auth: false, msg: 'Usuário ou senha incorretos.' })
+                }
+    
             } else {
-                res.json({ auth: false, msg: 'Usuário ou senha incorretos.' })
+                return res.json({ auth: false, msg: 'Você não tem permissão para logar.' })
             }
-
-        } else {
-            res.json({ auth: false, msg: 'Você não tem permissão para logar.' })
+        }else{
+            return res.json({ auth: false, msg: 'Usuário ou senha incorretos.' })
         }
+       
 
     }
 
