@@ -72,6 +72,8 @@ router.post('/criar-aviso', verifyJWT, SiteController.createAviso)
 router.get('/avisos', SiteController.getAvisos)
 router.get('/aviso', SiteController.getAvisoID)
 router.post('/editar-aviso', verifyJWT, SiteController.editarAviso)
+router.get('/ultimos-alistados', SiteController.getUltimosAlitos)
+router.get('/alistado', SiteController.pesquisaMilitar)
 
 //Posts
 router.post('/posts/criar', verifyJWT, PostsController.createPost)

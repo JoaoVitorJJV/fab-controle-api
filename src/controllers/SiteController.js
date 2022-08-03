@@ -260,7 +260,7 @@ class SiteController {
                     })
 
                     LogsController.gerarLog(usuario.nickname, `Criou um aviso no site, do tipo ${tipoVer}`, datetime)
-                    return res.json({auth: true, msg: 'Aviso criado com sucesso!'})
+                    return res.json({ auth: true, msg: 'Aviso criado com sucesso!' })
                 } else {
                     await SiteAvisos.create({
                         nome: nomeVer,
@@ -268,16 +268,16 @@ class SiteController {
                         tipo: (tipoVer === "Global" || tipoVer === "Novidades" ? tipoVer : "Global"),
                         datetime
                     })
-                   
+
                     LogsController.gerarLog(usuario.nickname, `Criou um aviso no site, do tipo ${tipoVer}`, datetime)
-                     return res.json({auth: true, msg: 'Aviso criado com sucesso!'})
+                    return res.json({ auth: true, msg: 'Aviso criado com sucesso!' })
                 }
 
             }
 
         }
 
-        return res.json({auth: false, msg: 'Ocorreu um erro, por favor tente novamente'})
+        return res.json({ auth: false, msg: 'Ocorreu um erro, por favor tente novamente' })
     }
 
     static getAvisos = async (req, res) => {
@@ -321,20 +321,20 @@ class SiteController {
     static getAvisoID = async (req, res) => {
         const id = req.query.id
 
-        if(id){
+        if (id) {
             const dados = await SiteAvisos.findOne({
                 where: {
                     id
                 }
             })
 
-            if(dados){
-                return res.json({auth: true, dados})
-            }else{
-                return res.json({auth: false})
+            if (dados) {
+                return res.json({ auth: true, dados })
+            } else {
+                return res.json({ auth: false })
             }
-        }else{
-            return res.json({auth: false})
+        } else {
+            return res.json({ auth: false })
         }
     }
 
@@ -379,16 +379,65 @@ class SiteController {
                     })
 
                     LogsController.gerarLog(usuario.nickname, `Criou um aviso no site, do tipo ${tipoVer}`, datetime)
-                    return res.json({auth: true, msg: 'Aviso criado com sucesso!'})
+                    return res.json({ auth: true, msg: 'Aviso criado com sucesso!' })
                 } else {
-                    return res.json({auth: false, msg: 'Aviso não encontrado'})
+                    return res.json({ auth: false, msg: 'Aviso não encontrado' })
                 }
 
             }
 
         }
 
-        return res.json({auth: false, msg: 'Ocorreu um erro, por favor tente novamente'})
+        return res.json({ auth: false, msg: 'Ocorreu um erro, por favor tente novamente' })
+    }
+
+    static getUltimosAlitos = async (req, res) => {
+        const resultado = await Alistados.findAll({
+            order: [
+                ["id", "DESC"]
+            ],
+            limit: 5
+        })
+
+        res.json({ auth: true, resultado })
+    }
+
+    static pesquisaMilitar = async (req, res) => {
+        const nome = req.query.nome
+
+        if (nome) {
+            const alistado = await Alistados.findOne({
+                where: {
+                    nickname: nome
+                }
+            })
+
+            if (alistado) {
+                const patente = await Patentes.findOne({
+                    attributes: ['nome_sem_estrela'],
+                    where: {
+                        id: alistado.patente_id
+                    }
+                })
+
+                var dados =
+                {
+                    nome: alistado.nickname,
+                    patente: patente.nome_sem_estrela,
+                    registro: alistado.registro,
+                    ultima_promocao: alistado.ultima_promocao,
+                    promovido_por: alistado.promovido_por,
+                    status: alistado.status
+                }
+
+
+                return res.json({ auth: true, resultado: dados })
+            } else {
+                return res.status(400).json({ error: true, message: 'Militar não encontrado' })
+            }
+        } else {
+            return res.status(400).json({ error: true, message: 'Você precisa fornecer o nome do militar' })
+        }
     }
 
 }
