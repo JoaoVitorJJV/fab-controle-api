@@ -226,7 +226,7 @@ class SiteController {
         const nome = req.body.nome
         const texto = req.body.txt
         const tipo = req.body.tipo
-
+        const titulo = req.body.titulo
 
         if (nome && tipo && texto) {
             const datetime = this.getDateTime()
@@ -247,25 +247,94 @@ class SiteController {
                 }
             })
             if (usuario) {
-                if (verificar) {
-                    await SiteAvisos.update({
-                        nome: nomeVer,
-                        texto: txt,
-                        tipo: (tipoVer === "Global" || tipoVer === "Novidades" ? tipoVer : "Global"),
-                        datetime
-                    }, {
+
+                if (tipo === 'Novidades') {
+                    const verificarNovidades = await SiteAvisos.findAll({
                         where: {
-                            id: verificar.id
+                            tipo: tipoVer
                         }
                     })
 
-                    LogsController.gerarLog(usuario.nickname, `Criou um aviso no site, do tipo ${tipoVer}`, datetime)
-                    return res.json({ auth: true, msg: 'Aviso criado com sucesso!' })
+                    if (verificarNovidades) {
+                        if (verificarNovidades.length === 3) {
+                            var id = 0;
+
+                            verificarNovidades.map((aviso) => {
+                                id = aviso.id
+                            })
+
+                            await SiteAvisos.update({
+                                nome: nomeVer,
+                                texto: txt,
+                                tipo: 'Novidades',
+                                datetime,
+                                titulo: (titulo ? titulo.toString() : '')
+
+                            }, {
+                                where: {
+                                    id
+                                }
+                            })
+
+                            LogsController.gerarLog(usuario.nickname, `Criou um aviso no site, do tipo ${tipoVer}`, datetime)
+                            return res.json({ auth: true, msg: 'Aviso criado com sucesso!' })
+                        } else {
+                            await SiteAvisos.create({
+                                nome: nomeVer,
+                                texto: txt,
+                                tipo: 'Novidades',
+                                datetime,
+                                titulo: (titulo ? titulo.toString() : '')
+                            })
+
+                            LogsController.gerarLog(usuario.nickname, `Criou um aviso no site, do tipo ${tipoVer}`, datetime)
+                            return res.json({ auth: true, msg: 'Aviso criado com sucesso!' })
+                        }
+                    }
+                }
+                if (verificar) {
+                    const verificarQTD = await SiteAvisos.findAll({
+                        where: {
+                            tipo: tipoVer
+                        }
+                    })
+                    if (verificarQTD.length === 2) {
+                        var id;
+
+                        verificarQTD.map((aviso) => {
+                            id = aviso.id
+                        })
+                        await SiteAvisos.update({
+                            nome: nomeVer,
+                            texto: txt,
+                            tipo: 'Global',
+                            datetime
+                        }, {
+                            where: {
+                                id
+                            }
+                        })
+                        LogsController.gerarLog(usuario.nickname, `Criou um aviso no site, do tipo ${tipoVer}`, datetime)
+                        return res.json({ auth: true, msg: 'Aviso criado com sucesso!' })
+                    }else{
+                        await SiteAvisos.create({
+                            nome: nomeVer,
+                            texto: txt,
+                            tipo: 'Global',
+                            datetime
+                        })
+    
+                        LogsController.gerarLog(usuario.nickname, `Criou um aviso no site, do tipo ${tipoVer}`, datetime)
+                        return res.json({ auth: true, msg: 'Aviso criado com sucesso!' })
+                    }
+
+
+                   
                 } else {
                     await SiteAvisos.create({
                         nome: nomeVer,
                         texto: txt,
-                        tipo: (tipoVer === "Global" || tipoVer === "Novidades" ? tipoVer : "Global"),
+                        tipo: 'Global',
                         datetime
                     })
 
@@ -431,14 +500,14 @@ class SiteController {
 
                 var sigla = ''
 
-                if(siglas){
+                if (siglas) {
                     await Promise.all(siglas.map(async (siglaUsuario) => {
-                        sigla += `<${siglaUsuario.sigla}> `                        
+                        sigla += `<${siglaUsuario.sigla}> `
                     }))
                 }
 
                 console.log(sigla)
-             
+
 
                 var dados =
                 {

@@ -448,6 +448,10 @@ export const SiteAvisos = instance.define('site_avisos', {
     datetime: {
         type: DataTypes.DATE,
         allowNull: false
+    },
+    titulo: {
+        type: DataTypes.STRING,
+        allowNull: true
     }
 }, {
     createdAt: false,
