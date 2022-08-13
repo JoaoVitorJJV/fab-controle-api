@@ -22,7 +22,7 @@ class AuthController {
                     const jwt = jsonwebtoken
                     const id = resultado.id
                     const token = jwt.sign({ id }, process.env.SECRET, {
-                        expiresIn: '1d'
+                        expiresIn: '10s'
                     });
     
     
