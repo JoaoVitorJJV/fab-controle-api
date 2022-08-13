@@ -341,14 +341,21 @@ class HomeController {
             const T1 = await Central.count({
                 where: {
                     data_envio: dia.dia,
-                    treino: 'Treinamento Básico I'
+                    treino: 'Instrução Básica Militar'
                 }
             })
 
             const T2 = await Central.count({
                 where: {
                     data_envio: dia.dia,
-                    treino: 'Treinamento Básico II'
+                    treino: 'Instrução Intermediária Militar'
+                }
+            })
+
+            const T3 = await Central.count({
+                where: {
+                    data_envio: dia.dia,
+                    treino: 'Instrução Avançada Militar'
                 }
             })
 
@@ -362,7 +369,8 @@ class HomeController {
                 dia: dia.dia,
                 treinos: {
                     basicoI: T1,
-                    basicoII: T2
+                    basicoII: T2,
+                    basicoIII: T3
                 }
             }
         }))
@@ -378,21 +386,28 @@ class HomeController {
         const T1Hoje = await Central.count({
             where: {
                 data_envio: hojeFormatado,
-                treino: 'Treinamento Básico I'
+                treino: 'Instrução Básica Militar'
             }
         })
 
         const T2Hoje = await Central.count({
             where: {
                 data_envio: hojeFormatado,
-                treino: 'Treinamento Básico II'
+                treino: 'Instrução Intermediária Militar'
+            }
+        })
+
+        const T3hoje = await Central.count({
+            where: {
+                data_envio: hojeFormatado,
+                treino: 'Instrução Avançada Militar'
             }
         })
 
         const alitadosTotais = await Alistados.count({})
 
         const hojeMetas = {
-            alistadosHoje, T1Hoje, T2Hoje
+            alistadosHoje, T1Hoje, T2Hoje, T3hoje
         }
 
         const pracaDestaque = await SiteDestaques.findOne({
@@ -406,7 +421,15 @@ class HomeController {
                 tipo: 'oficial'
             }
         })
-        res.json({ auth: true, alistados: dados, treinamentos, hojeMetas, alitadosTotais, pracaDestaque: pracaDestaque.nome, oficialDestaque: oficialDestaque.nome })
+        res.json({ 
+            auth: true, 
+            alistados: dados, 
+            treinamentos, 
+            hojeMetas, 
+            alitadosTotais, 
+            pracaDestaque: pracaDestaque.nome, 
+            oficialDestaque: oficialDestaque.nome 
+        })
     }
 
 
