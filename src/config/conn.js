@@ -11,11 +11,11 @@ import {Sequelize} from 'sequelize'
 // })
 
 const instance = new Sequelize(
-  'pvFnBSJWAn', 
-  'pvFnBSJWAn', 
-  'xDvdg65ZLL', 
-  {
-    host: 'remotemysql.com',
+  'fabhbb23_geral', 
+  'fabhbb23_cmd', 
+  '3P%v=ASgJSkL', 
+{
+    host: '162.241.203.146',
     dialect: 'mysql'
 })
 

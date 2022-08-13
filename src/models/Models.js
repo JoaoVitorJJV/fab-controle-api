@@ -453,3 +453,73 @@ export const SiteAvisos = instance.define('site_avisos', {
     createdAt: false,
     updatedAt: false
 })
+
+export const SiglasUsuarios = instance.define('siglas_usuarios', {
+    id: {
+        type: DataTypes.INTEGER,
+        autoIncrement: true,
+        primaryKey: true,
+        allowNull: false
+    },
+    id_usuario: {
+        type: DataTypes.STRING,
+        allowNull: false
+    },
+    sigla: {
+        type: DataTypes.STRING,
+        allowNull: false
+    },
+    atribuido_em: {
+        type: DataTypes.DATE,
+        allowNull: false
+    },
+    id_sigla: {
+        type: DataTypes.INTEGER,
+        allowNull: false
+    },
+    ordem: {
+        type: DataTypes.INTEGER,
+        allowNull: false
+    }
+}, {
+    createdAt: false,
+    updatedAt: false
+})
+
+export const SiglasPainel = instance.define('siglas_painel', {
+    id: {
+        type: DataTypes.INTEGER,
+        allowNull: false,
+        autoIncrement: true,
+        primaryKey: true
+    },
+    nome: {
+        type: DataTypes.STRING,
+        allowNull: false
+    },
+    tipo: {
+        type: DataTypes.ENUM('praca', 'oficial', 'ambos'),
+        allowNull: false
+    },
+    status: {
+        type: DataTypes.ENUM('ativo', 'inativo'),
+        allowNull: false
+        
+    },
+    descricao: {
+        type: DataTypes.STRING,
+        allowNull: false
+    },
+    ordem: {
+        type: DataTypes.INTEGER,
+        allowNull: false
+    },
+    a_partir_de: {
+        type: DataTypes.STRING,
+        allowNull: false
+    }
+}, {
+    createdAt: false,
+    updatedAt: false,
+    tableName: 'siglas_painel'
+})

@@ -1,4 +1,4 @@
-import { Alistados, Opnioes, Patentes, Usuarios } from "../models/Models.js";
+import { Alistados, Opnioes, Patentes, SiglasPainel, SiglasUsuarios, Usuarios } from "../models/Models.js";
 import validator from "validator";
 import LogsController from "./LogsController.js";
 import bcrypt from 'bcrypt';
@@ -38,7 +38,7 @@ class OficiaisController {
     static inserirAlistado = async (req, res, next) => {
         const nome = req.body.nome
         const patente = req.body.pat
-        const oficial = req.body.ofc
+        const oficial = req.headers['authorization'];
         const status = req.body.status
         let dataISO = new Date()
         const datetime = new Date(`${dataISO}+0300`).toISOString().slice(0, 19).replace('T', ' ');
@@ -46,6 +46,7 @@ class OficiaisController {
         var pat = parseInt(patente)
         var ofc = oficial.toString()
         var statusStr = status.toString()
+
 
         const oficialUsu = await Usuarios.findOne({
 
@@ -67,6 +68,7 @@ class OficiaisController {
                     nickname: nomeStr
                 }
             })
+
 
             if (!verifyUser) {
 
@@ -115,12 +117,178 @@ class OficiaisController {
                 LogsController.gerarLog(ofc, `Promoveu/rebaixou o militar ${nomeStr} no painel.`, datetime)
                 res.json({ auth: true, msg })
             }
+
+
         } else {
             res.json({ auth: false, msg: 'Os campos não foram enviados corretamente.' })
         }
 
     }
 
+    static verificacaoSigla = async (siglaID, patenteUsuarioId) => {
+        const sigla = await SiglasPainel.findOne({
+            where: {
+                id: siglaID
+            }
+        })
+
+        if(sigla){
+            const patMin = sigla.a_partir_de
+            const patNumero = await Patentes.findOne({
+                where: {
+                    nome_sem_estrela: patMin
+                }
+            })
+
+         
+
+            if(patNumero.id >= patenteUsuarioId){
+                return true
+            }else{
+                return false
+            }
+        }
+    }
+
+    static inserirSigla = async (req, res, next) => {
+        const token = req.headers['authorization'];
+        const nome = req.body.nome
+        const sigla = req.body.sigla
+        let dataISO = new Date()
+        const datetime = new Date(`${dataISO}+0300`).toISOString().slice(0, 19).replace('T', ' ');
+
+
+        if (nome && sigla) {
+            
+            const nomeOficial = await Usuarios.findOne({
+                where: {
+                    token
+                }
+            })
+            const ver = this.verificacaoSigla(sigla, nomeOficial.pat_id)
+
+            if(ver){
+                const nomeStr = nome.toString()
+                const idAlistado = await Alistados.findOne({
+                    attributes: ['id'],
+                    where: {
+                        nickname: nomeStr
+                    }
+                })
+    
+                const siglaBD = await SiglasPainel.findOne({
+                    where: {
+                        id: sigla
+                    }
+                })
+    
+    
+                if (idAlistado) {
+                    if (siglaBD.nome !== "PARA-SAR") {
+                        const siglaExistente = await SiglasUsuarios.findAll({
+                            where: {
+                                id_usuario: idAlistado.id
+                            }
+                        })
+    
+                        if (siglaExistente) {
+    
+                            await Promise.all(siglaExistente.map(async (siglaUser) => {
+                              
+                                if (siglaUser.sigla !== 'PARA-SAR') {
+                                    await SiglasUsuarios.destroy({
+                                        where: {
+                                            id_usuario: idAlistado.id,
+                                            id_sigla: siglaUser.id_sigla
+                                        }
+                                    })
+                                }
+                            }))
+    
+                        }
+                    }
+    
+    
+    
+                    if (siglaBD) {
+                        await SiglasUsuarios.create({
+                            id_usuario: idAlistado.id,
+                            sigla: siglaBD.nome,
+                            atribuido_em: datetime,
+                            id_sigla: siglaBD.id,
+                            ordem: siglaBD.ordem
+                        })
+                    }
+    
+                    LogsController.gerarLog(nomeOficial.nickname, `Aplicou a sigla: ${siglaBD.nome} ao alistado ${nome}`, datetime)
+                    return res.json({ auth: true, msg: 'Sigla aplicada com sucesso!' })
+                } else {
+                    return res.json({ auth: false, msg: 'O Militar precisa ser alistado.' })
+                }
+            }else{
+                return res.json({auth: false, msg: 'Você não tem permissão para atribuir essa sigla aeste usuario.'})
+            }
+         
+        } else {
+            return res.json({ auth: false, msg: 'Campos enviados incorretamente.' })
+        }
+
+    }
+
+    static removerSigla = async (req, res, next) => {
+        const token = req.headers['authorization'];
+        const nome = req.body.nome
+        const sigla = req.body.sigla
+        let dataISO = new Date()
+        const datetime = new Date(`${dataISO}+0300`).toISOString().slice(0, 19).replace('T', ' ');
+
+
+        if(nome && sigla){
+            const oficial = await Usuarios.findOne({
+                where: {
+                    token
+                }
+            })
+
+            const ver = this.verificacaoSigla(sigla, oficial.pat_id)
+
+            if(ver){
+                const usuario = await Alistados.findOne({
+                    where: {
+                        nickname: nome
+                    }
+                })
+
+                if(usuario){
+                    const verificarSigla = await SiglasUsuarios.findOne({
+                        where: {
+                            id_usuario: usuario.id,
+                            id_sigla: sigla
+                        }
+                    })
+
+                    if(verificarSigla){
+                        await SiglasUsuarios.destroy({
+                            where: {
+                                id: verificarSigla.id                                                              
+                            }
+                        })
+
+                        LogsController.gerarLog(oficial.nickname, `Removeu a sigla: ${verificarSigla.sigla} do usuário ${usuario.nickname}`, datetime)
+                        return res.json({auth: true, msg: 'Sigla removida com sucesso!'})
+                    }else{
+                        return res.json({auth: false, msg: 'O militar informado não possui essa sigla.'})
+                    }
+                }else{
+                    return res.json({auth: false, msg: 'O Militar precisa ser alistado.'})
+                }
+            }else{
+                return res.json({auth: false, msg: 'Você não tem permissão para remover essa sigla.'})
+            }
+        }else{
+            return res.json({auth: false, msg: 'Campos enviados incorretamente.'})
+        }
+    }
     static criarUsuario = async (req, res, next) => {
         const nome = req.body.nickname
         const senha = req.body.senha
@@ -300,12 +468,12 @@ class OficiaisController {
             }
         })
 
-        if(usuario){
-           return  res.json({ auth: true, usuario })
-        }else
-        return res.json({auth: false})
+        if (usuario) {
+            return res.json({ auth: true, usuario })
+        } else
+            return res.json({ auth: false })
 
-        
+
 
     }
 
@@ -364,7 +532,7 @@ class OficiaisController {
                 const hash = bcrypt.hashSync(senhaVer, 10)
                 novaSenha = hash
             }
-            
+
 
             await Usuarios.update({ nickname: nomeVer, pat_id: patente, senha: (novaSenha ? novaSenha : usuarioEnviado.senha) }, {
                 where: {
@@ -373,7 +541,7 @@ class OficiaisController {
             })
 
 
-           const datetime = this.getDateTime()
+            const datetime = this.getDateTime()
 
             const usuarioNome = await Usuarios.findOne({
                 where: {
@@ -387,7 +555,7 @@ class OficiaisController {
 
     }
 
-    static getUsuarioController =  async (idEnviado) => {
+    static getUsuarioController = async (idEnviado) => {
         const result = await Usuarios.findOne({
             where: {
                 id: idEnviado
@@ -401,8 +569,8 @@ class OficiaisController {
         const nome = req.body.nome
         const user = req.body.usuarioID
 
-        if(nome == 'Alberto-Dumont'){
-            return res.json({auth: false, msg: 'Você não pode bloquear esse usuário.'})
+        if (nome == 'Alberto-Dumont') {
+            return res.json({ auth: false, msg: 'Você não pode bloquear esse usuário.' })
         }
 
         const usuarioEnviado = await Usuarios.findOne({
@@ -411,7 +579,7 @@ class OficiaisController {
             }
         })
 
-        await Usuarios.update({status: (usuarioEnviado.status == 1 ? 0 : 1)}, {
+        await Usuarios.update({ status: (usuarioEnviado.status == 1 ? 0 : 1) }, {
             where: {
                 nickname: nome
             }
@@ -428,16 +596,16 @@ class OficiaisController {
 
         LogsController.gerarLog(usuario.nickname, `${usuarioEnviado.status == 1 ? 'Desbloqueou' : 'Bloqueou'} o usuário ${nome}`, datetime)
 
-        res.json({auth: true, msg: `${nome} ${usuarioEnviado.status == 1 ? 'desbloqueado' : 'bloqueado'} com sucesso!`})
+        res.json({ auth: true, msg: `${nome} ${usuarioEnviado.status == 1 ? 'desbloqueado' : 'bloqueado'} com sucesso!` })
     }
-    
+
     static giveOpniao = async (req, res, next) => {
         const nomeOficial = req.body.oficial
         const nomeUsuario = req.body.nomeUsuario
         const opniao = req.body.opniao
 
 
-        if(nomeOficial && nomeUsuario && opniao){
+        if (nomeOficial && nomeUsuario && opniao) {
             var nomeOficialVer = nomeOficial.toString()
             const nomeUsuarioVer = nomeUsuario.toString()
 
@@ -453,7 +621,7 @@ class OficiaisController {
                 }
             })
 
-            if(verifyUser){
+            if (verifyUser) {
                 const patenteOficial = await Patentes.findOne({
                     where: {
                         id: oficial.pat_id
@@ -466,21 +634,21 @@ class OficiaisController {
                     }
                 })
                 const datetime = this.getDateTime()
-                if(patenteOficial.id < 16){
-                    if(patenteUsuario.id < 10){
+                if (patenteOficial.id < 16) {
+                    if (patenteUsuario.id < 10) {
 
                         await Opnioes.create({
                             id_usuario: verifyUser.id,
                             nome_oficial: oficial.nickname,
                             texto: opniao.toString()
                         })
-                        
+
                         LogsController.gerarLog(nomeOficial, `Atribuiu a opnião: ${opniao} ao usuário ${verifyUser.nickname}`, datetime)
-                        return res.json({auth: true, msg: `Opnião de ${nomeUsuarioVer} inserida com sucesso!`})
-                    }else{
-                        return res.json({auth: false, msg: 'Somente o Alto Comando pode dar opnião para Oficiais!'})
+                        return res.json({ auth: true, msg: `Opnião de ${nomeUsuarioVer} inserida com sucesso!` })
+                    } else {
+                        return res.json({ auth: false, msg: 'Somente o Alto Comando pode dar opnião para Oficiais!' })
                     }
-                }else{
+                } else {
                     await Opnioes.create({
                         id_usuario: verifyUser.id,
                         nome_oficial: oficial.nickname,
@@ -488,12 +656,61 @@ class OficiaisController {
                     })
 
                     LogsController.gerarLog(nomeOficial, `Atribuiu a opnião: ${opniao} ao usuário ${verifyUser.nickname}`, datetime)
-                    return res.json({auth: true, msg: `Opnião de ${nomeUsuarioVer} inserida com sucesso!`})
-                }                               
+                    return res.json({ auth: true, msg: `Opnião de ${nomeUsuarioVer} inserida com sucesso!` })
+                }
             }
 
-            return res.json({auth: false, msg: `Usuário não encontrado.`})
+            return res.json({ auth: false, msg: `Usuário não encontrado.` })
         }
+    }
+
+    static getSiglas = async (req, res, next) => {
+        const token = req.headers['authorization'];
+
+        const usuario = await Usuarios.findOne({
+            where: {
+                token
+            }
+        })
+
+        if (usuario) {
+            const pat_id_usuario = usuario.pat_id
+
+            var siglasArray = []
+
+            const siglas = await SiglasPainel.findAll({
+                where: {
+                    status: 'ativo'
+                },
+                order: [
+                    ['ordem', 'asc']
+                ]
+            })
+
+            if (siglas) {
+                await Promise.all(siglas.map(async (sigla, i) => {
+                    const pat_id_map = await Patentes.findOne({
+                        where: {
+                            nome_sem_estrela: sigla.a_partir_de
+                        }
+                    })
+
+                    const pat_id_sigla = pat_id_map.id
+
+                    if (pat_id_usuario >= pat_id_sigla) {
+                        siglasArray[i] = {
+                            id: sigla.id,
+                            nome: sigla.nome
+                        }
+                    }
+
+                }))
+
+                return res.json({ auth: true, siglas: siglasArray })
+            }
+        }
+
+        return res.json({ auth: false })
     }
 
 }

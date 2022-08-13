@@ -1,4 +1,4 @@
-import { Alistados, Patentes, SiteAvisos, SiteDestaques, Usuarios } from "../models/Models.js";
+import { Alistados, Patentes, SiglasUsuarios, SiteAvisos, SiteDestaques, Usuarios } from "../models/Models.js";
 import LogsController from "./LogsController.js";
 
 class SiteController {
@@ -420,6 +420,26 @@ class SiteController {
                     }
                 })
 
+                const siglas = await SiglasUsuarios.findAll({
+                    where: {
+                        id_usuario: alistado.id
+                    },
+                    order: [
+                        ['ordem', 'asc']
+                    ]
+                })
+
+                var sigla = ''
+
+                if(siglas){
+                    await Promise.all(siglas.map(async (siglaUsuario) => {
+                        sigla += `<${siglaUsuario.sigla}> `                        
+                    }))
+                }
+
+                console.log(sigla)
+             
+
                 var dados =
                 {
                     nome: alistado.nickname,
@@ -427,7 +447,8 @@ class SiteController {
                     registro: alistado.registro,
                     ultima_promocao: alistado.ultima_promocao,
                     promovido_por: alistado.promovido_por,
-                    status: alistado.status
+                    status: alistado.status,
+                    siglas: (sigla ? sigla : 'Nenhuma')
                 }
 
 

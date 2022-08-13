@@ -127,7 +127,7 @@ class CentralController {
 
         if(usuarioDB){
             var nomeUsuario = usuarioDB.nickname
-            var relatorio;
+            
             let dataISO = new Date()
             const datetime = new Date(`${dataISO}+0300`).toISOString().slice(0, 19).replace('T', ' ');
 
@@ -186,6 +186,67 @@ class CentralController {
         }
 
         return res.json({auth: true, msg: 'Ocorreu um erro, verifique se o relatório já foi excluido.'})
+    }
+
+    static getRelatorios = async (req, res, next) => {
+        const relatorios = await Central.findAll({
+            order: [
+                ['id', 'desc']
+            ],
+            limit: 25
+        }) 
+
+        res.json({auth: true, relatorios})
+    }
+
+    static aceitarRelatorio = async (req, res, next) => {
+        const token = req.headers['authorization'];
+        const idRel = req.body.idRel
+
+        if(idRel){
+            const usuario = await Usuarios.findOne({
+                where: {
+                    token
+                }
+            })
+    
+            if(usuario){
+                const nomeUsuario = usuario.nickname
+                const relatorio = await Central.findOne({
+                    where: {
+                        id: idRel
+                    }
+                })
+    
+                if(relatorio){
+                    const id = relatorio.id
+                    let dataISO = new Date()
+                    const datetime = new Date(`${dataISO}+0300`).toISOString().slice(0, 19).replace('T', ' ');
+    
+    
+                    await Central.update({
+                        status: 'Corrigido',
+                        oficial_verificou: nomeUsuario
+                    }, {
+                        where: {
+                            id
+                        }
+                    })
+                    LogsController.gerarLog(nomeUsuario, `Marcou como corrigido o relatório de ID: #${id}`, datetime)
+                    return res.json({auth: true})
+                }else{
+                    return res.json({auth: false, msg: 'Relatório inexistente.'})
+                }
+    
+            }else{
+                return res.status(403).json({auth: false, msg: 'Unauthorized'})
+            }
+        }else{
+            return res.json({auth: false, msg: 'Parâmetro ID não enviado.'})
+        }
+
+        
+
     }
 }
 

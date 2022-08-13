@@ -1,5 +1,6 @@
 import express from 'express'
 import verifyJWT from "../config/jwtVerift.js";
+import verifyCentral from '../config/verifyCentral.js';
 import AlistadoController from '../controllers/AlistadosController.js';
 import AuthController from "../controllers/AuthController.js";
 import CentralController from '../controllers/CentralController.js';
@@ -52,12 +53,18 @@ router.get('/usuario/editar', verifyJWT, OficiaisController.getUsuarioNome)
 router.post('/editar-usuario', verifyJWT, OficiaisController.editarUsuario)
 router.post('/bloquear', verifyJWT, OficiaisController.bloquearUsuario)
 router.post('/opniao', verifyJWT, OficiaisController.giveOpniao)
+router.get('/siglas', verifyJWT, OficiaisController.getSiglas)
+router.post('/siglas/inserir', verifyJWT, OficiaisController.inserirSigla)
+router.post('/siglas/remover', verifyJWT, OficiaisController.removerSigla)
 
 //Central
 router.get('/fab/relatorios', verifyJWT, CentralController.getAllRelatorios)
 router.post('/fazer-relatorio', verifyJWT, CentralController.createRelatorio)
 router.post('/editar-relatorio', verifyJWT, CentralController.editRelatorio)
 router.post('/exluir-relatorio', verifyJWT, CentralController.deleteRel)
+router.get('/central', verifyCentral, CentralController.getRelatorios)
+router.get('/central/app', verifyJWT, CentralController.getRelatorios)
+router.post('/central/aceitar', verifyJWT, CentralController.aceitarRelatorio)
 
 //Treinamentos
 router.get('/treinos', TreinamentosController.getTreinamentos)
