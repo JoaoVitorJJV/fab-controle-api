@@ -40,8 +40,7 @@ class OficiaisController {
         const patente = req.body.pat
         const oficial = req.headers['authorization'];
         const status = req.body.status
-        let dataISO = new Date()
-        const datetime = new Date(`${dataISO}+0300`).toISOString().slice(0, 19).replace('T', ' ');
+        const datetime = new Date().toISOString().slice(0, 19).replace('T', ' ');
         var nomeStr = nome.toString()
         var pat = parseInt(patente)
         var ofc = oficial.toString()
@@ -51,7 +50,7 @@ class OficiaisController {
         const oficialUsu = await Usuarios.findOne({
 
             where: {
-                nickname: ofc
+                token: oficial
             }
         })
 
@@ -71,14 +70,17 @@ class OficiaisController {
 
 
             if (!verifyUser) {
+                var hoje = new Date()
 
+                var hojeFormatado = hoje.toLocaleDateString('pt-BR', {day: '2-digit', month: '2-digit', year: 'numeric'})
                 await Alistados.create({
                     nickname: nomeStr,
                     patente_id: patente,
                     registro: datetime,
                     promovido_por: ofc,
                     ultima_promocao: datetime,
-                    status: statusStr
+                    status: statusStr,
+                    registro_data: hojeFormatado
                 })
 
                 LogsController.gerarLog(ofc, `Alistou o militar ${nomeStr} no painel.`, datetime)
