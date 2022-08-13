@@ -4,8 +4,7 @@ import LogsController from "./LogsController.js";
 
 class PostsController {
     static getDateTime = () => {
-        let dataISO = new Date()
-        const datetime = new Date(`${dataISO}+0300`).toISOString().slice(0, 19).replace('T', ' ');
+        const datetime = new Date().toISOString().slice(0, 19).replace('T', ' ');
 
         return datetime;
     }
