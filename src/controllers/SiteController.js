@@ -418,6 +418,7 @@ class SiteController {
         const nome = req.body.nome
         const texto = req.body.txt
         const tipo = req.body.tipo
+        const titulo = req.body.titulo
 
 
         if (id && nome && tipo && texto) {
@@ -431,8 +432,6 @@ class SiteController {
                     tipo: id
                 }
             })
-
-            console.log(id)
             const token = req.headers['authorization'];
 
             const usuario = await Usuarios.findOne({
@@ -446,7 +445,8 @@ class SiteController {
                         nome: nomeVer,
                         texto: txt,
                         tipo: (tipoVer === "Global" || tipoVer === "Novidades" ? tipoVer : "Global"),
-                        datetime
+                        datetime,
+                        titulo: (titulo ? titulo : '')
                     }, {
                         where: {
                             id: verificar.id
