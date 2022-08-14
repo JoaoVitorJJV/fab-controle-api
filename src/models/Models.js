@@ -275,6 +275,14 @@ export const Treinamentos = instance.define('treinamentos', {
     status: {
         type: DataTypes.TINYINT,
         allowNull: false
+    },
+    cor: {
+        type: DataTypes.STRING,
+        allowNull: false
+    },
+    sigla: {
+        type: DataTypes.STRING,
+        allowNull: false
     }
 },{
     createdAt: false,
