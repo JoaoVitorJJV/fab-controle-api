@@ -387,9 +387,15 @@ class SiteController {
         res.json({ auth: true, dados })
     }
 
+    static getAvisosPainel = async (req, res) => {
+        const avisos = await SiteAvisos.findAll({})
+
+        res.json({auth: true, avisos})
+    }
+
     static getAvisoID = async (req, res) => {
         const id = req.query.id
-
+        console.log(id)
         if (id) {
             const dados = await SiteAvisos.findOne({
                 where: {
