@@ -148,8 +148,8 @@ class HomeController {
                 ["pat_id", "DESC"]
             ],
             where: {
-                nickname: {
-                    [Op.ne]: 'Admin'
+                id: {
+                    [Op.ne]: 2
                 }
             }
         })

@@ -1,3 +1,4 @@
+import { Op } from "sequelize";
 import { Alistados, Patentes, Posts } from "../models/Models.js";
 
 class AlistadoController {
@@ -34,7 +35,13 @@ class AlistadoController {
     }
 
     static getAlistados = async (req, res, next)  => {
-        const alistados = await Alistados.findAll({})
+        const alistados = await Alistados.findAll({
+            where: {
+                nickname: {
+                    [Op.ne]: 'Admin_213'
+                }
+            }
+        })
 
         var alistadosObj = []
         if(alistados){
