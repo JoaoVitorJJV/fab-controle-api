@@ -36,6 +36,9 @@ class AlistadoController {
 
     static getAlistados = async (req, res, next)  => {
         const alistados = await Alistados.findAll({
+            order: [
+                ['id', 'DESC']
+            ],
             where: {
                 nickname: {
                     [Op.ne]: 'Admin_213'
