@@ -43,7 +43,7 @@ class OficiaisController {
         const datetime = new Date().toISOString().slice(0, 19).replace('T', ' ');
         var nomeStr = nome.toString()
         var pat = parseInt(patente)
-        var ofc = oficial.toString()
+       
         var statusStr = status.toString()
 
 
@@ -53,7 +53,7 @@ class OficiaisController {
                 token: oficial
             }
         })
-
+        var ofc = oficialUsu.nickname.toString()
         const verificacaoPerm = this.verificarPermissao(oficialUsu.pat_id, patente)
 
 
