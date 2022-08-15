@@ -355,7 +355,14 @@ class HomeController {
             const T3 = await Central.count({
                 where: {
                     data_envio: dia.dia,
-                    treino: 'Instrução Avançada Militar'
+                    treino: 'Treinamento Complementar I'
+                }
+            })
+
+            const T4 = await Central.count({
+                where: {
+                    data_envio: dia.dia,
+                    treino: 'Treinamento Complementar II'
                 }
             })
 
@@ -370,7 +377,8 @@ class HomeController {
                 treinos: {
                     basicoI: T1,
                     basicoII: T2,
-                    basicoIII: T3
+                    basicoIII: T3,
+                    basicoIV: T4
                 }
             }
         }))
@@ -400,14 +408,21 @@ class HomeController {
         const T3hoje = await Central.count({
             where: {
                 data_envio: hojeFormatado,
-                treino: 'Instrução Avançada Militar'
+                treino: 'Treinamento Complementar I'
+            }
+        })
+
+        const T4hoje = await Central.count({
+            where: {
+                data_envio: hojeFormatado,
+                treino: 'Treinamento Complementar II'
             }
         })
 
         const alitadosTotais = await Alistados.count({})
 
         const hojeMetas = {
-            alistadosHoje, T1Hoje, T2Hoje, T3hoje
+            alistadosHoje, T1Hoje, T2Hoje, T3hoje, T4hoje
         }
 
         const pracaDestaque = await SiteDestaques.findOne({

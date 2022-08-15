@@ -292,6 +292,7 @@ class OficiaisController {
         }
     }
     static criarUsuario = async (req, res, next) => {
+        const token = req.headers['authorization'];
         const nome = req.body.nickname
         const senha = req.body.senha
         const pat = req.body.pat
@@ -306,7 +307,7 @@ class OficiaisController {
 
         const usuarioDB = await Usuarios.findOne({
             where: {
-                id: usuarioId
+                token
             }
         })
 
@@ -487,6 +488,7 @@ class OficiaisController {
     }
 
     static editarUsuario = async (req, res, next) => {
+        const token = req.headers['authorization'];
         const nome = req.body.nome
         const pat = req.body.pat
         const senha = req.body.senha
@@ -505,7 +507,7 @@ class OficiaisController {
 
         const usuarioEnviado = await Usuarios.findOne({
             where: {
-                nickname: nomeVer
+                token
             }
         })
 
@@ -568,8 +570,8 @@ class OficiaisController {
     }
 
     static bloquearUsuario = async (req, res, next) => {
+        const token = req.headers['authorization'];
         const nome = req.body.nome
-        const user = req.body.usuarioID
 
         if (nome == 'Alberto-Dumont') {
             return res.json({ auth: false, msg: 'Você não pode bloquear esse usuário.' })
@@ -589,7 +591,7 @@ class OficiaisController {
 
         const usuario = await Usuarios.findOne({
             where: {
-                id: user
+                token
             }
         })
 
@@ -599,6 +601,47 @@ class OficiaisController {
         LogsController.gerarLog(usuario.nickname, `${usuarioEnviado.status == 1 ? 'Desbloqueou' : 'Bloqueou'} o usuário ${nome}`, datetime)
 
         res.json({ auth: true, msg: `${nome} ${usuarioEnviado.status == 1 ? 'desbloqueado' : 'bloqueado'} com sucesso!` })
+    }
+
+    static deleteUsuario = async (req, res, next) => {
+        const token = req.headers['authorization'];
+        const usuarioNome = req.body.nome
+
+        const usuario = await Usuarios.findOne({
+            where: {
+                token
+            }
+        })
+
+        const usuarioExcluir = await Usuarios.findOne({
+            where: {
+                nickname: usuarioNome
+            }
+        })
+
+        if(usuario){
+            if(usuario.nickname === 'Alberto-Dumont'){
+                if(usuarioExcluir){
+                    await Usuarios.destroy({
+                        where: {
+                            id: usuarioExcluir.id
+                        }
+                    })
+
+                    const datetime = this.getDateTime()
+
+                    LogsController.gerarLog(usuario.nickname, `Excluiu o usuário: ${usuarioExcluir.nickname}`, datetime)
+                    return res.json({auth: true, msg: `${usuarioExcluir.nickname} foi excluido com sucesso.`})
+                }else{
+                    return res.json({auth: false, msg: `O usuário informado não existe.`})
+                }
+                
+            }else{
+                return res.json({auth: false, msg: `Você não tem permissão para excluir usuários.`})
+            }
+        }else{
+            return res.json({auth: false, msg: `Ocorreu um erro, tente novamente mais tarde.`})
+        }
     }
 
     static giveOpniao = async (req, res, next) => {

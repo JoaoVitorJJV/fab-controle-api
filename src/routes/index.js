@@ -56,6 +56,7 @@ router.post('/opniao', verifyJWT, OficiaisController.giveOpniao)
 router.get('/siglas', verifyJWT, OficiaisController.getSiglas)
 router.post('/siglas/inserir', verifyJWT, OficiaisController.inserirSigla)
 router.post('/siglas/remover', verifyJWT, OficiaisController.removerSigla)
+router.post('/usuarios/deletar', verifyJWT, OficiaisController.deleteUsuario)
 
 //Central
 router.get('/fab/relatorios', verifyJWT, CentralController.getAllRelatorios)

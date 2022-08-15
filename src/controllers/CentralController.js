@@ -51,8 +51,7 @@ class CentralController {
         if(usuarioDB){
             var nomeUsuario = usuarioDB.nickname
             var relatorio;
-            let dataISO = new Date()
-            const datetime = new Date(`${dataISO}+0300`).toISOString().slice(0, 19).replace('T', ' ');
+            const datetime = new Date().toISOString().slice(0, 19).replace('T', ' ');
 
             await Central.create({
                 user_id: data.idUsuario,
@@ -178,8 +177,8 @@ class CentralController {
             })
 
             const nomeUsuario = usuario.nickname
-            let dataISO = new Date()
-            const datetime = new Date(`${dataISO}+0300`).toISOString().slice(0, 19).replace('T', ' ');
+     
+            const datetime = new Date().toISOString().slice(0, 19).replace('T', ' ');
             
             LogsController.gerarLog(nomeUsuario, `Deletou o relatório de ID: ${id}`, datetime)
             return res.json({auth: true, msg: `Relatório de ID: ${id} deletado!`})
