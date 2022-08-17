@@ -145,7 +145,7 @@ class HomeController {
     static getUsuarios = async (req, res, next) => {
         const usuarios = await Usuarios.findAll({
             order: [
-                ["pat_id", "DESC"]
+                ["id", "DESC"]
             ],
             where: {
                 id: {
