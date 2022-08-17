@@ -512,8 +512,6 @@ class SiteController {
                     }))
                 }
 
-                console.log(sigla)
-
 
                 var dados =
                 {
@@ -529,10 +527,10 @@ class SiteController {
 
                 return res.json({ auth: true, resultado: dados })
             } else {
-                return res.status(400).json({ error: true, message: 'Militar não encontrado' })
+                return res.json({ error: true, message: 'Militar não encontrado' })
             }
         } else {
-            return res.status(400).json({ error: true, message: 'Você precisa fornecer o nome do militar' })
+            return res.json({ error: true, message: 'Você precisa fornecer o nome do militar' })
         }
     }
 
