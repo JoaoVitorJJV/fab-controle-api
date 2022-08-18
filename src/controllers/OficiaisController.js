@@ -90,7 +90,7 @@ class OficiaisController {
 
                 const userId = verifyUser.id
                 const userName = verifyUser.nickname
-                await Alistados.update({ patente_id: pat }, {
+                await Alistados.update({ patente_id: pat, ultima_promocao: datetime }, {
                     where: {
                         id: userId
                     }
@@ -111,10 +111,14 @@ class OficiaisController {
                     })
                 }
                 var msg;
-                if (verifyUser.patente_id > pat) {
+              
+                if (verifyUser.patente_id < pat) {
+              
                     msg = `O militar ${userName} foi promovido com sucesso, dê os parabéns ao mesmo!`
                 } else if (verifyUser.patente_id == pat) {
                     msg = `Nenhuma ação foi feita com esse militar.`
+                }else{
+                    msg = `O militar ${userName} foi rebaixado com sucesso.`
                 }
                 LogsController.gerarLog(ofc, `Promoveu/rebaixou o militar ${nomeStr} no painel.`, datetime)
                 res.json({ auth: true, msg })
@@ -480,8 +484,7 @@ class OficiaisController {
     }
 
     static getDateTime = () => {
-        let dataISO = new Date()
-        const datetime = new Date(`${dataISO}+0300`).toISOString().slice(0, 19).replace('T', ' ');
+        const datetime = new Date().toISOString().slice(0, 19).replace('T', ' ');
 
         return datetime;
     }
