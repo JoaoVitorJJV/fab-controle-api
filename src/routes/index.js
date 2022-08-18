@@ -57,6 +57,12 @@ router.get('/siglas', verifyJWT, OficiaisController.getSiglas)
 router.post('/siglas/inserir', verifyJWT, OficiaisController.inserirSigla)
 router.post('/siglas/remover', verifyJWT, OficiaisController.removerSigla)
 router.post('/usuarios/deletar', verifyJWT, OficiaisController.deleteUsuario)
+router.post('/slides/criar', verifyJWT, OficiaisController.criarSlide)
+router.get('/slides', OficiaisController.getSlides)
+router.post('/slides/trocar-posicao', verifyJWT, OficiaisController.trocarPosicaoSlide)
+router.get('/slide', verifyJWT, OficiaisController.getSlideID)
+router.post('/slide/editar', verifyJWT, OficiaisController.editSlide)
+router.post('/slide/excluir', verifyJWT, OficiaisController.excluirSlide)
 
 //Central
 router.get('/fab/relatorios', verifyJWT, CentralController.getAllRelatorios)

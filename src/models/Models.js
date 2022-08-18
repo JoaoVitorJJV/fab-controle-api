@@ -535,3 +535,32 @@ export const SiglasPainel = instance.define('siglas_painel', {
     updatedAt: false,
     tableName: 'siglas_painel'
 })
+
+export const SlidesSite = instance.define('slides_site', {
+    id: {
+        type: DataTypes.INTEGER,
+        allowNull: false,
+        primaryKey: true,
+        autoIncrement: true
+    },
+    slide_url: {
+        type: DataTypes.STRING,
+        allowNull: false
+    },
+    slide_alt: {
+        type: DataTypes.STRING,
+        allowNull: false
+    },
+    slide_ordem: {
+        type: DataTypes.INTEGER,
+        allowNull: true
+    },
+    slide_url_a: {
+        type: DataTypes.STRING,
+        allowNull: false
+    }
+}, {
+    createdAt: false,
+    updatedAt: false,
+    tableName: 'slides_site'
+})

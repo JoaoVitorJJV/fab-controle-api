@@ -1,4 +1,4 @@
-import { Alistados, Opnioes, Patentes, SiglasPainel, SiglasUsuarios, Usuarios } from "../models/Models.js";
+import { Alistados, Opnioes, Patentes, SiglasPainel, SiglasUsuarios, SlidesSite, Usuarios } from "../models/Models.js";
 import validator from "validator";
 import LogsController from "./LogsController.js";
 import bcrypt from 'bcrypt';
@@ -43,7 +43,7 @@ class OficiaisController {
         const datetime = new Date().toISOString().slice(0, 19).replace('T', ' ');
         var nomeStr = nome.toString()
         var pat = parseInt(patente)
-       
+
         var statusStr = status.toString()
 
 
@@ -72,7 +72,7 @@ class OficiaisController {
             if (!verifyUser) {
                 var hoje = new Date()
 
-                var hojeFormatado = hoje.toLocaleDateString('pt-BR', {day: '2-digit', month: '2-digit', year: 'numeric'})
+                var hojeFormatado = hoje.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric' })
                 await Alistados.create({
                     nickname: nomeStr,
                     patente_id: patente,
@@ -111,13 +111,13 @@ class OficiaisController {
                     })
                 }
                 var msg;
-              
+
                 if (verifyUser.patente_id < pat) {
-              
+
                     msg = `O militar ${userName} foi promovido com sucesso, dê os parabéns ao mesmo!`
                 } else if (verifyUser.patente_id == pat) {
                     msg = `Nenhuma ação foi feita com esse militar.`
-                }else{
+                } else {
                     msg = `O militar ${userName} foi rebaixado com sucesso.`
                 }
                 LogsController.gerarLog(ofc, `Promoveu/rebaixou o militar ${nomeStr} no painel.`, datetime)
@@ -138,7 +138,7 @@ class OficiaisController {
             }
         })
 
-        if(sigla){
+        if (sigla) {
             const patMin = sigla.a_partir_de
             const patNumero = await Patentes.findOne({
                 where: {
@@ -146,11 +146,11 @@ class OficiaisController {
                 }
             })
 
-         
 
-            if(patNumero.id >= patenteUsuarioId){
+
+            if (patNumero.id >= patenteUsuarioId) {
                 return true
-            }else{
+            } else {
                 return false
             }
         }
@@ -165,7 +165,7 @@ class OficiaisController {
 
 
         if (nome && sigla) {
-            
+
             const nomeOficial = await Usuarios.findOne({
                 where: {
                     token
@@ -173,7 +173,7 @@ class OficiaisController {
             })
             const ver = this.verificacaoSigla(sigla, nomeOficial.pat_id)
 
-            if(ver){
+            if (ver) {
                 const nomeStr = nome.toString()
                 const idAlistado = await Alistados.findOne({
                     attributes: ['id'],
@@ -181,14 +181,14 @@ class OficiaisController {
                         nickname: nomeStr
                     }
                 })
-    
+
                 const siglaBD = await SiglasPainel.findOne({
                     where: {
                         id: sigla
                     }
                 })
-    
-    
+
+
                 if (idAlistado) {
                     if (siglaBD.nome !== "PARA-SAR") {
                         const siglaExistente = await SiglasUsuarios.findAll({
@@ -196,11 +196,11 @@ class OficiaisController {
                                 id_usuario: idAlistado.id
                             }
                         })
-    
+
                         if (siglaExistente) {
-    
+
                             await Promise.all(siglaExistente.map(async (siglaUser) => {
-                              
+
                                 if (siglaUser.sigla !== 'PARA-SAR') {
                                     await SiglasUsuarios.destroy({
                                         where: {
@@ -210,12 +210,12 @@ class OficiaisController {
                                     })
                                 }
                             }))
-    
+
                         }
                     }
-    
-    
-    
+
+
+
                     if (siglaBD) {
                         await SiglasUsuarios.create({
                             id_usuario: idAlistado.id,
@@ -225,16 +225,16 @@ class OficiaisController {
                             ordem: siglaBD.ordem
                         })
                     }
-    
+
                     LogsController.gerarLog(nomeOficial.nickname, `Aplicou a sigla: ${siglaBD.nome} ao alistado ${nome}`, datetime)
                     return res.json({ auth: true, msg: 'Sigla aplicada com sucesso!' })
                 } else {
                     return res.json({ auth: false, msg: 'O Militar precisa ser alistado.' })
                 }
-            }else{
-                return res.json({auth: false, msg: 'Você não tem permissão para atribuir essa sigla aeste usuario.'})
+            } else {
+                return res.json({ auth: false, msg: 'Você não tem permissão para atribuir essa sigla aeste usuario.' })
             }
-         
+
         } else {
             return res.json({ auth: false, msg: 'Campos enviados incorretamente.' })
         }
@@ -249,7 +249,7 @@ class OficiaisController {
         const datetime = new Date(`${dataISO}+0300`).toISOString().slice(0, 19).replace('T', ' ');
 
 
-        if(nome && sigla){
+        if (nome && sigla) {
             const oficial = await Usuarios.findOne({
                 where: {
                     token
@@ -258,14 +258,14 @@ class OficiaisController {
 
             const ver = this.verificacaoSigla(sigla, oficial.pat_id)
 
-            if(ver){
+            if (ver) {
                 const usuario = await Alistados.findOne({
                     where: {
                         nickname: nome
                     }
                 })
 
-                if(usuario){
+                if (usuario) {
                     const verificarSigla = await SiglasUsuarios.findOne({
                         where: {
                             id_usuario: usuario.id,
@@ -273,26 +273,26 @@ class OficiaisController {
                         }
                     })
 
-                    if(verificarSigla){
+                    if (verificarSigla) {
                         await SiglasUsuarios.destroy({
                             where: {
-                                id: verificarSigla.id                                                              
+                                id: verificarSigla.id
                             }
                         })
 
                         LogsController.gerarLog(oficial.nickname, `Removeu a sigla: ${verificarSigla.sigla} do usuário ${usuario.nickname}`, datetime)
-                        return res.json({auth: true, msg: 'Sigla removida com sucesso!'})
-                    }else{
-                        return res.json({auth: false, msg: 'O militar informado não possui essa sigla.'})
+                        return res.json({ auth: true, msg: 'Sigla removida com sucesso!' })
+                    } else {
+                        return res.json({ auth: false, msg: 'O militar informado não possui essa sigla.' })
                     }
-                }else{
-                    return res.json({auth: false, msg: 'O Militar precisa ser alistado.'})
+                } else {
+                    return res.json({ auth: false, msg: 'O Militar precisa ser alistado.' })
                 }
-            }else{
-                return res.json({auth: false, msg: 'Você não tem permissão para remover essa sigla.'})
+            } else {
+                return res.json({ auth: false, msg: 'Você não tem permissão para remover essa sigla.' })
             }
-        }else{
-            return res.json({auth: false, msg: 'Campos enviados incorretamente.'})
+        } else {
+            return res.json({ auth: false, msg: 'Campos enviados incorretamente.' })
         }
     }
     static criarUsuario = async (req, res, next) => {
@@ -621,9 +621,9 @@ class OficiaisController {
             }
         })
 
-        if(usuario){
-            if(usuario.nickname === 'Alberto-Dumont'){
-                if(usuarioExcluir){
+        if (usuario) {
+            if (usuario.nickname === 'Alberto-Dumont') {
+                if (usuarioExcluir) {
                     await Usuarios.destroy({
                         where: {
                             id: usuarioExcluir.id
@@ -633,16 +633,16 @@ class OficiaisController {
                     const datetime = this.getDateTime()
 
                     LogsController.gerarLog(usuario.nickname, `Excluiu o usuário: ${usuarioExcluir.nickname}`, datetime)
-                    return res.json({auth: true, msg: `${usuarioExcluir.nickname} foi excluido com sucesso.`})
-                }else{
-                    return res.json({auth: false, msg: `O usuário informado não existe.`})
+                    return res.json({ auth: true, msg: `${usuarioExcluir.nickname} foi excluido com sucesso.` })
+                } else {
+                    return res.json({ auth: false, msg: `O usuário informado não existe.` })
                 }
-                
-            }else{
-                return res.json({auth: false, msg: `Você não tem permissão para excluir usuários.`})
+
+            } else {
+                return res.json({ auth: false, msg: `Você não tem permissão para excluir usuários.` })
             }
-        }else{
-            return res.json({auth: false, msg: `Ocorreu um erro, tente novamente mais tarde.`})
+        } else {
+            return res.json({ auth: false, msg: `Ocorreu um erro, tente novamente mais tarde.` })
         }
     }
 
@@ -758,6 +758,220 @@ class OficiaisController {
         }
 
         return res.json({ auth: false })
+    }
+
+    static criarSlide = async (req, res, next) => {
+        const token = req.headers['authorization'];
+        const slideAlt = req.body.slideAlt
+        const urlImagem = req.body.urlImagem
+        const urlDirecao = req.body.urlDirecao
+
+        if (slideAlt && urlDirecao && urlImagem) {
+            const slideAltStr = slideAlt.toString()
+            const urlImagemStr = urlImagem.toString()
+            const urlDirecaoStr = urlDirecao.toString()
+
+            const slides = await SlidesSite.findAll({})
+
+            var ordem = 0;
+
+            if (slides) {
+                slides.map((slide) => {
+                    ordem = slide.slide_ordem
+                })
+            }
+
+            await SlidesSite.create({
+                slide_url: urlImagemStr,
+                slide_alt: slideAltStr,
+                slide_ordem: (ordem + 1),
+                slide_url_a: urlDirecaoStr
+            })
+
+            const oficial = await Usuarios.findOne({
+                where: {
+                    token
+                }
+            })
+
+            const datetime = this.getDateTime()
+
+            LogsController.gerarLog(oficial.nickname, `Criou um slide no painel.`, datetime)
+            return res.json({ auth: true, msg: 'Slide criado com sucesso!' })
+        }
+
+        return res.json({ auth: false, msg: 'Campos enviados incorretamente.' })
+    }
+
+    static getSlides = async (req, res, next) => {
+        const slides = await SlidesSite.findAll({
+            order: [
+                ['slide_ordem', 'ASC']
+            ]
+        })
+
+        res.json({ auth: true, slides })
+    }
+
+    static trocarPosicaoSlide = async (req, res, next) => {
+        const posAtual = req.body.posAtual
+        const direcao = req.body.direcao
+        const id = req.body.id
+
+        if (posAtual && id && direcao) {
+
+
+
+            const slideAtual = await SlidesSite.findOne({
+                where: {
+                    id
+                }
+            })
+            if (slideAtual) {
+
+                if (direcao === 'Abaixo') {
+                    if (slideAtual.slide_ordem - 1 == 0)
+                        return res.json({ auth: false })
+                }
+
+                await SlidesSite.update({
+                    slide_ordem: (direcao === 'Acima' ? (slideAtual.slide_ordem + 1) : (slideAtual.slide_ordem - 1))
+                }, {
+                    where: {
+                        id: slideAtual.id
+                    }
+                })
+                const slides = await SlidesSite.findAll({
+                    where: {
+                        slide_ordem: (direcao === 'Acima' ? (slideAtual.slide_ordem + 1) : (slideAtual.slide_ordem - 1))
+                    }
+                })
+
+                if (slides) {
+                    await Promise.all(
+                        slides.map(async (slide) => {
+                            if (slide.id !== id) {
+                                await SlidesSite.update({
+                                    slide_ordem: (direcao === 'Acima' ? (slide.slide_ordem - 1) : (slide.slide_ordem + 1))
+                                }, {
+                                    where: {
+                                        id: slide.id
+                                    }
+                                })
+                            }
+                        })
+                    )
+
+                }
+
+            }
+
+            return res.json({ auth: true })
+        }
+
+        return res.json({ auth: false })
+    }
+
+    static getSlideID = async (req, res, next) => {
+        const id = req.query.id
+
+        if (id) {
+            const slide = await SlidesSite.findOne({
+                where: {
+                    id
+                }
+            })
+
+            if (slide) {
+
+                return res.json({ auth: true, slide })
+            }
+        }
+
+        return res.json({ auth: false, msg: 'Campo ID não enviado' })
+    }
+
+    static editSlide = async (req, res, next) => {
+        const token = req.headers['authorization'];
+        const id = req.body.id
+        const slideAlt = req.body.slideAlt
+        const urlImagem = req.body.urlImagem
+        const urlDirecao = req.body.urlDirecao
+
+        const oficial = await Usuarios.findOne({
+            where: {
+                token
+            }
+        })
+   
+        if (id && slideAlt && urlImagem && urlDirecao && oficial) {
+            const slideAltStr = slideAlt.toString()
+            const urlImagemStr = urlImagem.toString()
+            const urlDirecaoStr = urlDirecao.toString()
+
+            const slide = await SlidesSite.findOne({
+                where: {
+                    id
+                }
+            })
+
+            
+           
+            if (slide) {
+                await SlidesSite.update({
+                    slide_url: urlImagemStr,
+                    slide_alt: slideAltStr,
+                    slide_ordem: (slide.slide_ordem + 1),
+                    slide_url_a: urlDirecaoStr
+                }, {
+                    where: {
+                        id
+                    }
+                })
+                const datetime = this.getDateTime()
+                LogsController.gerarLog(oficial.nickname, `Editou o Slide de id: ${id}`, datetime)
+                return res.json({auth: true, msg: 'Slide editado com sucesso!'})
+            }
+
+
+        }
+
+
+        return res.json({auth: false, msg: 'Erro ao editar esse slide.'})
+
+    }
+
+    static excluirSlide = async (req, res, next) => {
+        const token = req.headers['authorization'];
+        const id = req.body.id
+
+        const oficial = await Usuarios.findOne({
+            where: {
+                token
+            }
+        })
+
+        if(oficial && id){
+            const slide = await SlidesSite.findOne({
+                where:{
+                    id
+                }
+            })
+
+            if(slide){
+                await SlidesSite.destroy({
+                    where: {
+                        id
+                    }
+                })
+
+                const datetime = this.getDateTime()
+                LogsController.gerarLog(oficial.nickname, `Apagou o Slide de título: ${slide.slide_alt}`, datetime)
+                return res.json({auth: true, msg: 'Excluído com sucesso!'})
+            }
+        }
+
+        return res.json({auth: false, msg: 'Erro ao excluir esse slide.'})
     }
 
 }
