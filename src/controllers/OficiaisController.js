@@ -90,7 +90,7 @@ class OficiaisController {
 
                 const userId = verifyUser.id
                 const userName = verifyUser.nickname
-                await Alistados.update({ patente_id: pat, ultima_promocao: datetime }, {
+                await Alistados.update({ patente_id: pat, ultima_promocao: datetime, status: statusStr }, {
                     where: {
                         id: userId
                     }
@@ -115,9 +115,11 @@ class OficiaisController {
                 if (verifyUser.patente_id < pat) {
 
                     msg = `O militar ${userName} foi promovido com sucesso, dê os parabéns ao mesmo!`
-                } else if (verifyUser.patente_id == pat) {
+                } else if (verifyUser.patente_id == pat && verifyUser.status == status) {
                     msg = `Nenhuma ação foi feita com esse militar.`
-                } else {
+                }else if(verifyUser.status !== status){
+                    msg = `O militar foi demitido com sucesso.`
+                }else {
                     msg = `O militar ${userName} foi rebaixado com sucesso.`
                 }
                 LogsController.gerarLog(ofc, `Promoveu/rebaixou o militar ${nomeStr} no painel.`, datetime)
