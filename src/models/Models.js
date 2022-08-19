@@ -30,7 +30,13 @@ export const Alistados = instance.define('alistados', {
         allowNull:false
     },
     status: {
-        type: DataTypes.ENUM('Ativo','Demitido - Traição', 'Demitido - Mau Comportamento', 'Demitido - Sem volta'),
+        type: DataTypes.ENUM(
+            'Ativo',
+            'Demitido - Traição', 
+            'Demitido - Mau Comportamento', 
+            'Demitido - Sem volta',
+            'Demitido - Auto-Demissão'
+            ),
         allowNull: false
     },
     registro_data: {
