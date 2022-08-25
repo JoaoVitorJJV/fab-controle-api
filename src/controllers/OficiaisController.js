@@ -634,6 +634,10 @@ class OficiaisController {
         if (usuario) {
             if (usuario.nickname === 'Alberto-Dumont') {
                 if (usuarioExcluir) {
+                    if(usuarioExcluir === 'Alberto-Dumont'){
+                        LogsController.gerarLog(usuario.nickname, `Tentou excluir o usuário: ${usuarioExcluir.nickname}`, datetime)
+                        return res.json({ auth: false, msg: `Esse usuário não pode ser excluido.` })
+                    }
                     await Usuarios.destroy({
                         where: {
                             id: usuarioExcluir.id
