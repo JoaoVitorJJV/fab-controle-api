@@ -634,6 +634,7 @@ class OficiaisController {
         if (usuario) {
             if (usuario.nickname === 'Alberto-Dumont') {
                 if (usuarioExcluir) {
+                    const datetime = this.getDateTime()
                     if(usuarioExcluir === 'Alberto-Dumont'){
                         LogsController.gerarLog(usuario.nickname, `Tentou excluir o usuário: ${usuarioExcluir.nickname}`, datetime)
                         return res.json({ auth: false, msg: `Esse usuário não pode ser excluido.` })
@@ -644,7 +645,7 @@ class OficiaisController {
                         }
                     })
 
-                    const datetime = this.getDateTime()
+                    
 
                     LogsController.gerarLog(usuario.nickname, `Excluiu o usuário: ${usuarioExcluir.nickname}`, datetime)
                     return res.json({ auth: true, msg: `${usuarioExcluir.nickname} foi excluido com sucesso.` })
