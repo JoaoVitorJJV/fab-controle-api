@@ -35,7 +35,9 @@ export const Alistados = instance.define('alistados', {
             'Demitido - Traição', 
             'Demitido - Mau Comportamento', 
             'Demitido - Sem volta',
-            'Demitido - Auto-Demissão'
+            'Demitido - Auto-Demissão',
+            'Afastado',
+            'Aposentado'
             ),
         allowNull: false
     },

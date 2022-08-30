@@ -90,9 +90,9 @@ class OficiaisController {
 
                 const userId = verifyUser.id
                 const userName = verifyUser.nickname
-                await Alistados.update({ 
-                    patente_id: pat, 
-                    ultima_promocao: datetime, 
+                await Alistados.update({
+                    patente_id: pat,
+                    ultima_promocao: datetime,
                     status: statusStr,
                     promovido_por: ofc
                 }, {
@@ -123,10 +123,39 @@ class OficiaisController {
                 } else if (verifyUser.patente_id == pat && verifyUser.status == status) {
                     msgLog = `Não fez nenhuma ação no militar ${userName}`
                     msg = `Nenhuma ação foi feita com esse militar.`
-                }else if(verifyUser.status !== status){
-                    msgLog = `Demitiu o militar ${userName}`
-                    msg = `O militar foi demitido com sucesso.`
-                }else {
+                } else if (verifyUser.status !== status) {
+                    switch (status) {
+                        case "Demitido - Traição":
+                            msgLog = `Demitiu o militar ${userName}`
+                            msg = `O militar foi demitido com sucesso.`
+                            break;
+                        case "Demitido - Mau Comportamento":
+                            msgLog = `Demitiu o militar ${userName}`
+                            msg = `O militar foi demitido com sucesso.`
+                            break;
+                        case "Demitido - Sem volta":
+                            msgLog = `Demitiu o militar ${userName}`
+                            msg = `O militar foi demitido com sucesso.`
+                            break;
+                        case "Demitido - Auto-Demissão":
+                            msgLog = `Demitiu o militar ${userName}`
+                            msg = `O militar foi demitido com sucesso.`
+                            break;
+                        case "Afastado":
+                            msgLog = `Afastou o militar ${userName}`
+                            msg = `O militar foi afastado com sucesso.`
+                            break;
+                        case "Aposentado":
+                            msgLog = `Aposentou o militar ${userName}`
+                            msg = `O militar foi aposentado com sucesso.`
+                            break;
+                        case "Ativo":
+                            msgLog = `Marcou como ativo o status do militar ${userName}`
+                            msg = `O status foi marcado como ativo com sucesso.`
+                            break;
+
+                    }
+                } else {
                     msgLog = `Rebaixou o militar ${userName}`
                     msg = `O militar ${userName} foi rebaixado com sucesso.`
                 }
@@ -635,7 +664,7 @@ class OficiaisController {
             if (usuario.nickname === 'Alberto-Dumont') {
                 if (usuarioExcluir) {
                     const datetime = this.getDateTime()
-                    if(usuarioExcluir === 'Alberto-Dumont'){
+                    if (usuarioExcluir === 'Alberto-Dumont') {
                         LogsController.gerarLog(usuario.nickname, `Tentou excluir o usuário: ${usuarioExcluir.nickname}`, datetime)
                         return res.json({ auth: false, msg: `Esse usuário não pode ser excluido.` })
                     }
@@ -645,7 +674,7 @@ class OficiaisController {
                         }
                     })
 
-                    
+
 
                     LogsController.gerarLog(usuario.nickname, `Excluiu o usuário: ${usuarioExcluir.nickname}`, datetime)
                     return res.json({ auth: true, msg: `${usuarioExcluir.nickname} foi excluido com sucesso.` })
@@ -918,7 +947,7 @@ class OficiaisController {
                 token
             }
         })
-   
+
         if (id && slideAlt && urlImagem && urlDirecao && oficial) {
             const slideAltStr = slideAlt.toString()
             const urlImagemStr = urlImagem.toString()
@@ -930,8 +959,8 @@ class OficiaisController {
                 }
             })
 
-            
-           
+
+
             if (slide) {
                 await SlidesSite.update({
                     slide_url: urlImagemStr,
@@ -945,14 +974,14 @@ class OficiaisController {
                 })
                 const datetime = this.getDateTime()
                 LogsController.gerarLog(oficial.nickname, `Editou o Slide de id: ${id}`, datetime)
-                return res.json({auth: true, msg: 'Slide editado com sucesso!'})
+                return res.json({ auth: true, msg: 'Slide editado com sucesso!' })
             }
 
 
         }
 
 
-        return res.json({auth: false, msg: 'Erro ao editar esse slide.'})
+        return res.json({ auth: false, msg: 'Erro ao editar esse slide.' })
 
     }
 
@@ -966,14 +995,14 @@ class OficiaisController {
             }
         })
 
-        if(oficial && id){
+        if (oficial && id) {
             const slide = await SlidesSite.findOne({
-                where:{
+                where: {
                     id
                 }
             })
 
-            if(slide){
+            if (slide) {
                 await SlidesSite.destroy({
                     where: {
                         id
@@ -982,11 +1011,11 @@ class OficiaisController {
 
                 const datetime = this.getDateTime()
                 LogsController.gerarLog(oficial.nickname, `Apagou o Slide de título: ${slide.slide_alt}`, datetime)
-                return res.json({auth: true, msg: 'Excluído com sucesso!'})
+                return res.json({ auth: true, msg: 'Excluído com sucesso!' })
             }
         }
 
-        return res.json({auth: false, msg: 'Erro ao excluir esse slide.'})
+        return res.json({ auth: false, msg: 'Erro ao excluir esse slide.' })
     }
 
 }
