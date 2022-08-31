@@ -43,6 +43,8 @@ class OficiaisController {
         const datetime = new Date().toISOString().slice(0, 19).replace('T', ' ');
         var nomeStr = nome.toString()
         var pat = parseInt(patente)
+        var oficialResp = req.body.ofc
+        var oficalRespString = oficialResp.toString()
 
         var statusStr = status.toString()
 
@@ -77,7 +79,7 @@ class OficiaisController {
                     nickname: nomeStr,
                     patente_id: patente,
                     registro: datetime,
-                    promovido_por: ofc,
+                    promovido_por: oficalRespString,
                     ultima_promocao: datetime,
                     status: statusStr,
                     registro_data: hojeFormatado
@@ -87,14 +89,13 @@ class OficiaisController {
 
                 res.json({ auth: true, nome: nomeStr, msg: 'Militar alistado com sucesso, dê as boas vindas!' })
             } else {
-
                 const userId = verifyUser.id
                 const userName = verifyUser.nickname
                 await Alistados.update({
                     patente_id: pat,
                     ultima_promocao: datetime,
                     status: statusStr,
-                    promovido_por: ofc
+                    promovido_por: oficalRespString
                 }, {
                     where: {
                         id: userId
